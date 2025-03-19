@@ -57,95 +57,108 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js';
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js';
     
-    // Firebase configuration from environment variables
-    const firebaseConfig = {
-      apiKey: "AIzaSyA24r-TwSvMOlE9aokR43t0s2VBAtREsrU",
-      authDomain: "coachreva-bcd07.firebaseapp.com",
-      projectId: "coachreva-bcd07",
-      storageBucket: "coachreva-bcd07.appspot.com",
-      messagingSenderId: "751684770315",
-      appId: "1:751684770315:web:daad494615dab6183b050e"
-    };
-    
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    
-    // DOM elements
-    const signInButton = document.getElementById('sign-in');
-    const signOutButton = document.getElementById('sign-out');
-    const authStatus = document.getElementById('auth-status');
-    const testPromptButton = document.getElementById('test-prompt');
-    const responseElement = document.getElementById('response');
-    
-    // Sign in with Google
-    signInButton.addEventListener('click', async () => {
+    // Firebase configuration - load dynamically from server
+    let firebaseConfig = null;
+
+    // Fetch Firebase config from server
+    async function loadFirebaseConfig() {
       try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        console.error('Sign in error:', error);
-        authStatus.textContent = `Error signing in: ${error.message}`;
-        authStatus.className = 'error';
-      }
-    });
-    
-    // Sign out
-    signOutButton.addEventListener('click', async () => {
-      try {
-        await signOut(auth);
-      } catch (error) {
-        console.error('Sign out error:', error);
-      }
-    });
-    
-    // Test the daily prompt API
-    testPromptButton.addEventListener('click', async () => {
-      if (!auth.currentUser) {
-        responseElement.textContent = 'You must be signed in to test the API';
-        responseElement.className = 'error';
-        return;
-      }
-      
-      try {
-        const idToken = await auth.currentUser.getIdToken();
-        
-        responseElement.textContent = 'Loading...';
-        
-        const response = await fetch('/api/prompts/daily', {
-          headers: {
-            'Authorization': `Bearer ${idToken}`
-          }
-        });
-        
+        const response = await fetch('/api/config/firebase');
         const data = await response.json();
+        firebaseConfig = data.firebaseConfig;
         
-        if (response.ok) {
-          responseElement.textContent = JSON.stringify(data, null, 2);
-          responseElement.className = 'success';
-        } else {
-          responseElement.textContent = `Error: ${JSON.stringify(data, null, 2)}`;
+        // Initialize Firebase once config is loaded
+        const app = initializeApp(firebaseConfig);
+        return app;
+      } catch (error) {
+        console.error('Error loading Firebase config:', error);
+        document.getElementById('status').textContent = 'Error: Failed to load configuration';
+      }
+    }
+    
+    // Initialize Firebase asynchronously
+    const appPromise = loadFirebaseConfig();
+    
+    // Wait for Firebase to initialize before proceeding
+    appPromise.then(app => {
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
+      
+      // DOM elements
+      const signInButton = document.getElementById('sign-in');
+      const signOutButton = document.getElementById('sign-out');
+      const authStatus = document.getElementById('auth-status');
+      const testPromptButton = document.getElementById('test-prompt');
+      const responseElement = document.getElementById('response');
+      
+      // Sign in with Google
+      signInButton.addEventListener('click', async () => {
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (error) {
+          console.error('Sign in error:', error);
+          authStatus.textContent = `Error signing in: ${error.message}`;
+          authStatus.className = 'error';
+        }
+      });
+    
+      // Sign out
+      signOutButton.addEventListener('click', async () => {
+        try {
+          await signOut(auth);
+        } catch (error) {
+          console.error('Sign out error:', error);
+        }
+      });
+    
+      // Test the daily prompt API
+      testPromptButton.addEventListener('click', async () => {
+        if (!auth.currentUser) {
+          responseElement.textContent = 'You must be signed in to test the API';
+          responseElement.className = 'error';
+          return;
+        }
+        
+        try {
+          const idToken = await auth.currentUser.getIdToken();
+          
+          responseElement.textContent = 'Loading...';
+          
+          const response = await fetch('/api/prompts/daily', {
+            headers: {
+              'Authorization': `Bearer ${idToken}`
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            responseElement.textContent = JSON.stringify(data, null, 2);
+            responseElement.className = 'success';
+          } else {
+            responseElement.textContent = `Error: ${JSON.stringify(data, null, 2)}`;
+            responseElement.className = 'error';
+          }
+        } catch (error) {
+          responseElement.textContent = `Error: ${error.message}`;
           responseElement.className = 'error';
         }
-      } catch (error) {
-        responseElement.textContent = `Error: ${error.message}`;
-        responseElement.className = 'error';
-      }
-    });
+      });
     
     // Auth state change listener
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        authStatus.textContent = `Signed in as ${user.email}`;
-        authStatus.className = 'success';
-        signInButton.style.display = 'none';
-        signOutButton.style.display = 'inline-block';
-      } else {
-        authStatus.textContent = 'Not signed in';
-        authStatus.className = '';
-        signInButton.style.display = 'inline-block';
-        signOutButton.style.display = 'none';
-      }
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          authStatus.textContent = `Signed in as ${user.email}`;
+          authStatus.className = 'success';
+          signInButton.style.display = 'none';
+          signOutButton.style.display = 'inline-block';
+        } else {
+          authStatus.textContent = 'Not signed in';
+          authStatus.className = '';
+          signInButton.style.display = 'inline-block';
+          signOutButton.style.display = 'none';
+        }
+      });
     });
   </script>
 </body>

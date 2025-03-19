@@ -74,68 +74,80 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js';
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js';
     
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyA24r-TwSvMOlE9aokR43t0s2VBAtREsrU",
-      authDomain: "coachreva-bcd07.firebaseapp.com",
-      projectId: "coachreva-bcd07",
-      storageBucket: "coachreva-bcd07.appspot.com",
-      messagingSenderId: "751684770315",
-      appId: "1:751684770315:web:daad494615dab6183b050e"
-    };
-    
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    
-    // DOM elements
-    const signInButton = document.getElementById('sign-in');
-    const signOutButton = document.getElementById('sign-out');
-    const authStatus = document.getElementById('auth-status');
-    const testAuthButton = document.getElementById('test-auth');
-    const testPromptButton = document.getElementById('test-prompt');
-    const responseElement = document.getElementById('response');
-    const tokenDisplay = document.getElementById('token-display');
-    const debugLog = document.getElementById('debug-log');
-    
-    // Helper function to log debug info
-    function logDebug(message, type = 'info') {
-      const timestamp = new Date().toISOString();
-      const logEntry = document.createElement('div');
-      logEntry.className = type;
-      logEntry.textContent = `[${timestamp}] ${message}`;
-      debugLog.prepend(logEntry);
+    // Firebase configuration - load dynamically from server
+    let firebaseConfig = null;
+
+    // Fetch Firebase config from server
+    async function loadFirebaseConfig() {
+      try {
+        const response = await fetch('/api/config/firebase');
+        const data = await response.json();
+        firebaseConfig = data.firebaseConfig;
+        
+        // Initialize Firebase once config is loaded
+        const app = initializeApp(firebaseConfig);
+        return app;
+      } catch (error) {
+        console.error('Error loading Firebase config:', error);
+        document.getElementById('status').textContent = 'Error: Failed to load configuration';
+      }
     }
     
-    // Sign in with Google
-    signInButton.addEventListener('click', async () => {
-      try {
-        logDebug('Attempting to sign in with Google...');
-        await signInWithPopup(auth, provider);
-        logDebug('Sign in successful', 'success');
-      } catch (error) {
-        console.error('Sign in error:', error);
-        logDebug(`Sign in error: ${error.message}`, 'error');
-        authStatus.textContent = `Error signing in: ${error.message}`;
-        authStatus.className = 'error';
-      }
-    });
+    // Initialize Firebase asynchronously
+    const appPromise = loadFirebaseConfig();
     
-    // Sign out
-    signOutButton.addEventListener('click', async () => {
-      try {
-        logDebug('Signing out...');
-        await signOut(auth);
-        logDebug('Sign out successful', 'success');
-      } catch (error) {
-        console.error('Sign out error:', error);
-        logDebug(`Sign out error: ${error.message}`, 'error');
-      }
-    });
+    // Wait for Firebase to initialize before proceeding
+    appPromise.then(app => {
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
     
-    // Test auth status endpoint
-    testAuthButton.addEventListener('click', async () => {
+      // DOM elements
+      const signInButton = document.getElementById('sign-in');
+      const signOutButton = document.getElementById('sign-out');
+      const authStatus = document.getElementById('auth-status');
+      const testAuthButton = document.getElementById('test-auth');
+      const testPromptButton = document.getElementById('test-prompt');
+      const responseElement = document.getElementById('response');
+      const tokenDisplay = document.getElementById('token-display');
+      const debugLog = document.getElementById('debug-log');
+    
+      // Helper function to log debug info
+      function logDebug(message, type = 'info') {
+        const timestamp = new Date().toISOString();
+        const logEntry = document.createElement('div');
+        logEntry.className = type;
+        logEntry.textContent = `[${timestamp}] ${message}`;
+        debugLog.prepend(logEntry);
+      }
+    
+      // Sign in with Google
+      signInButton.addEventListener('click', async () => {
+        try {
+          logDebug('Attempting to sign in with Google...');
+          await signInWithPopup(auth, provider);
+          logDebug('Sign in successful', 'success');
+        } catch (error) {
+          console.error('Sign in error:', error);
+          logDebug(`Sign in error: ${error.message}`, 'error');
+          authStatus.textContent = `Error signing in: ${error.message}`;
+          authStatus.className = 'error';
+        }
+      });
+    
+      // Sign out
+      signOutButton.addEventListener('click', async () => {
+        try {
+          logDebug('Signing out...');
+          await signOut(auth);
+          logDebug('Sign out successful', 'success');
+        } catch (error) {
+          console.error('Sign out error:', error);
+          logDebug(`Sign out error: ${error.message}`, 'error');
+        }
+      });
+    
+      // Test auth status endpoint
+      testAuthButton.addEventListener('click', async () => {
       if (!auth.currentUser) {
         responseElement.textContent = 'You must be signed in to test the API';
         responseElement.className = 'error';
@@ -175,8 +187,8 @@
       }
     });
     
-    // Test the daily prompt API
-    testPromptButton.addEventListener('click', async () => {
+      // Test the daily prompt API
+      testPromptButton.addEventListener('click', async () => {
       if (!auth.currentUser) {
         responseElement.textContent = 'You must be signed in to test the API';
         responseElement.className = 'error';
@@ -216,8 +228,8 @@
       }
     });
     
-    // Auth state change listener
-    auth.onAuthStateChanged(user => {
+      // Auth state change listener
+      auth.onAuthStateChanged(user => {
       if (user) {
         authStatus.textContent = `Signed in as ${user.email}`;
         authStatus.className = 'success';
@@ -240,8 +252,9 @@
       }
     });
     
-    // Initial log
-    logDebug('Debug page loaded');
+      // Initial log
+      logDebug('Debug page loaded');
+    });
   </script>
 </body>
 </html>
