@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4A90E2">
+  <title>Coach Reva - Relationship Enhancement Virtual Assistant</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/images/icon-192x192.png">
+  <link rel="apple-touch-icon" href="/images/icon-192x192.png">
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="container">
+        <div class="logo">
+          <img src="/images/logo.svg" alt="Coach Reva Logo">
+          <h1>Coach Reva</h1>
+        </div>
+        <div id="user-info" class="hidden">
+          <button id="logout-btn">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <!-- Login Screen -->
+        <section id="login-screen">
+          <div class="card">
+            <h2>Welcome to Coach Reva</h2>
+            <p>Your Relationship Enhancement Virtual Assistant</p>
+            <p class="subtitle">Build a stronger relationship through daily check-ins</p>
+            <button id="login-btn" class="btn-primary">
+              <img src="/images/google-icon.svg" alt="Google Icon">
+              Sign in with Google
+            </button>
+          </div>
+        </section>
+
+        <!-- Check-in Screen -->
+        <section id="check-in-screen" class="hidden">
+          <div class="card">
+            <div id="prompt-container">
+              <h2>Today's Check-in</h2>
+              <div id="loading-indicator" class="hidden">
+                <div class="spinner"></div>
+                <p>Loading your daily check-in...</p>
+              </div>
+              <p id="prompt-text" class="prompt"></p>
+              <textarea id="response-input" placeholder="Type your response here..."></textarea>
+              <button id="submit-btn" class="btn-primary">Submit</button>
+            </div>
+            <div id="response-success" class="hidden">
+              <h2>Thank you!</h2>
+              <p>Your response has been recorded.</p>
+              <p>Come back tomorrow for a new check-in.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- History Screen -->
+        <section id="history-screen" class="hidden">
+          <div class="card">
+            <h2>Your Check-in History</h2>
+            <div id="history-list"></div>
+          </div>
+        </section>
+
+        <!-- Settings Screen -->
+        <section id="settings-screen" class="hidden">
+          <div class="card">
+            <h2>Settings</h2>
+            <div class="setting-item">
+              <label for="notification-time">Daily Notification Time</label>
+              <input type="time" id="notification-time" value="18:00">
+            </div>
+            <div class="setting-item">
+              <label>Notification Preferences</label>
+              <div class="toggle-container">
+                <span>Enable Notifications</span>
+                <label class="switch">
+                  <input type="checkbox" id="notification-toggle" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+            <button id="save-settings-btn" class="btn-primary">Save Settings</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <nav id="bottom-nav" class="hidden">
+      <div class="container">
+        <button id="nav-check-in" class="nav-item active">
+          <img src="/images/check-in-icon.svg" alt="Check-in">
+          <span>Check-in</span>
+        </button>
+        <button id="nav-history" class="nav-item">
+          <img src="/images/history-icon.svg" alt="History">
+          <span>History</span>
+        </button>
+        <button id="nav-settings" class="nav-item">
+          <img src="/images/settings-icon.svg" alt="Settings">
+          <span>Settings</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js"></script>
+  
+  <!-- App Scripts -->
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+    }
+  </script>
+</body>
+</html>

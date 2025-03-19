@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Firebase Authentication</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+    .info {
+      color: blue;
+    }
+    #token-display {
+      word-break: break-all;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Debug Firebase Authentication</h1>
+  
+  <div id="auth-status">Not signed in</div>
+  <button id="sign-in">Sign in with Google</button>
+  <button id="sign-out" style="display:none;">Sign out</button>
+  
+  <h2>Authentication Token</h2>
+  <div>
+    <pre id="token-display">No token available</pre>
+  </div>
+  
+  <h2>Test API Endpoints</h2>
+  <button id="test-auth">Test Auth Status</button>
+  <button id="test-prompt">Get Daily Prompt</button>
+  
+  <h3>Response:</h3>
+  <pre id="response">Click a test button to see results</pre>
+  
+  <h3>Debug Log:</h3>
+  <pre id="debug-log"></pre>
+  
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js';
+    
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA24r-TwSvMOlE9aokR43t0s2VBAtREsrU",
+      authDomain: "coachreva-bcd07.firebaseapp.com",
+      projectId: "coachreva-bcd07",
+      storageBucket: "coachreva-bcd07.appspot.com",
+      messagingSenderId: "751684770315",
+      appId: "1:751684770315:web:daad494615dab6183b050e"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    
+    // DOM elements
+    const signInButton = document.getElementById('sign-in');
+    const signOutButton = document.getElementById('sign-out');
+    const authStatus = document.getElementById('auth-status');
+    const testAuthButton = document.getElementById('test-auth');
+    const testPromptButton = document.getElementById('test-prompt');
+    const responseElement = document.getElementById('response');
+    const tokenDisplay = document.getElementById('token-display');
+    const debugLog = document.getElementById('debug-log');
+    
+    // Helper function to log debug info
+    function logDebug(message, type = 'info') {
+      const timestamp = new Date().toISOString();
+      const logEntry = document.createElement('div');
+      logEntry.className = type;
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      debugLog.prepend(logEntry);
+    }
+    
+    // Sign in with Google
+    signInButton.addEventListener('click', async () => {
+      try {
+        logDebug('Attempting to sign in with Google...');
+        await signInWithPopup(auth, provider);
+        logDebug('Sign in successful', 'success');
+      } catch (error) {
+        console.error('Sign in error:', error);
+        logDebug(`Sign in error: ${error.message}`, 'error');
+        authStatus.textContent = `Error signing in: ${error.message}`;
+        authStatus.className = 'error';
+      }
+    });
+    
+    // Sign out
+    signOutButton.addEventListener('click', async () => {
+      try {
+        logDebug('Signing out...');
+        await signOut(auth);
+        logDebug('Sign out successful', 'success');
+      } catch (error) {
+        console.error('Sign out error:', error);
+        logDebug(`Sign out error: ${error.message}`, 'error');
+      }
+    });
+    
+    // Test auth status endpoint
+    testAuthButton.addEventListener('click', async () => {
+      if (!auth.currentUser) {
+        responseElement.textContent = 'You must be signed in to test the API';
+        responseElement.className = 'error';
+        logDebug('Attempted to test auth without being signed in', 'error');
+        return;
+      }
+      
+      try {
+        logDebug('Getting ID token...');
+        const idToken = await auth.currentUser.getIdToken(true);
+        logDebug(`Token obtained (${idToken.length} characters)`);
+        
+        responseElement.textContent = 'Sending request to /api/auth/status...';
+        logDebug('Testing /api/auth/status endpoint...');
+        
+        const response = await fetch('/api/auth/status', {
+          headers: {
+            'Authorization': `Bearer ${idToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          responseElement.textContent = JSON.stringify(data, null, 2);
+          responseElement.className = 'success';
+          logDebug('Auth status request successful', 'success');
+        } else {
+          responseElement.textContent = `Error: ${JSON.stringify(data, null, 2)}`;
+          responseElement.className = 'error';
+          logDebug(`Auth status request failed: ${data.error}`, 'error');
+        }
+      } catch (error) {
+        responseElement.textContent = `Error: ${error.message}`;
+        responseElement.className = 'error';
+        logDebug(`Request error: ${error.message}`, 'error');
+      }
+    });
+    
+    // Test the daily prompt API
+    testPromptButton.addEventListener('click', async () => {
+      if (!auth.currentUser) {
+        responseElement.textContent = 'You must be signed in to test the API';
+        responseElement.className = 'error';
+        logDebug('Attempted to test prompt without being signed in', 'error');
+        return;
+      }
+      
+      try {
+        logDebug('Getting ID token...');
+        const idToken = await auth.currentUser.getIdToken(true);
+        logDebug(`Token obtained (${idToken.length} characters)`);
+        
+        responseElement.textContent = 'Sending request to /api/prompts/daily...';
+        logDebug('Testing /api/prompts/daily endpoint...');
+        
+        const response = await fetch('/api/prompts/daily', {
+          headers: {
+            'Authorization': `Bearer ${idToken}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          responseElement.textContent = JSON.stringify(data, null, 2);
+          responseElement.className = 'success';
+          logDebug('Daily prompt request successful', 'success');
+        } else {
+          responseElement.textContent = `Error: ${JSON.stringify(data, null, 2)}`;
+          responseElement.className = 'error';
+          logDebug(`Daily prompt request failed: ${data.error}`, 'error');
+        }
+      } catch (error) {
+        responseElement.textContent = `Error: ${error.message}`;
+        responseElement.className = 'error';
+        logDebug(`Request error: ${error.message}`, 'error');
+      }
+    });
+    
+    // Auth state change listener
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authStatus.textContent = `Signed in as ${user.email}`;
+        authStatus.className = 'success';
+        signInButton.style.display = 'none';
+        signOutButton.style.display = 'inline-block';
+        logDebug(`User signed in: ${user.email}`, 'success');
+        
+        // Display the token
+        user.getIdToken().then(token => {
+          tokenDisplay.textContent = token;
+          logDebug('Token displayed');
+        });
+      } else {
+        authStatus.textContent = 'Not signed in';
+        authStatus.className = '';
+        signInButton.style.display = 'inline-block';
+        signOutButton.style.display = 'none';
+        tokenDisplay.textContent = 'No token available';
+        logDebug('User signed out');
+      }
+    });
+    
+    // Initial log
+    logDebug('Debug page loaded');
+  </script>
+</body>
+</html>

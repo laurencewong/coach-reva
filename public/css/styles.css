@@ -1,0 +1,394 @@
+/* Base Styles */
+:root {
+  --primary-color: #4A90E2;
+  --primary-dark: #3A7BC8;
+  --secondary-color: #F5A623;
+  --text-color: #333333;
+  --light-text: #666666;
+  --background: #F5F7FA;
+  --card-background: #FFFFFF;
+  --border-color: #E0E0E0;
+  --success-color: #27AE60;
+  --error-color: #E74C3C;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Header Styles */
+header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 15px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 36px;
+  margin-right: 10px;
+}
+
+.logo h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+#logout-btn {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+#logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Main Content Styles */
+main {
+  padding: 30px 0;
+  min-height: calc(100vh - 130px);
+}
+
+.card {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: var(--light-text);
+  margin-bottom: 20px;
+}
+
+/* Button Styles */
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.btn-primary img {
+  height: 20px;
+  margin-right: 10px;
+}
+
+/* Login Screen */
+#login-screen .card {
+  text-align: center;
+  padding: 40px 25px;
+}
+
+#login-screen h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+#login-screen p {
+  margin-bottom: 10px;
+}
+
+/* Check-in Screen */
+.prompt {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+#response-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  resize: vertical;
+}
+
+#response-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+#response-success {
+  text-align: center;
+  padding: 20px 0;
+}
+
+#response-success h2 {
+  color: var(--success-color);
+}
+
+/* Loading Indicator */
+#loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(74, 144, 226, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* History Screen */
+#history-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.history-item {
+  border-bottom: 1px solid var(--border-color);
+  padding: 15px 0;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-date {
+  font-size: 0.9rem;
+  color: var(--light-text);
+  margin-bottom: 5px;
+}
+
+.history-prompt {
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.history-response {
+  background-color: var(--background);
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+/* Settings Screen */
+.setting-item {
+  margin-bottom: 20px;
+}
+
+.setting-item label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.setting-item input[type="time"] {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-color);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Bottom Navigation */
+#bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+#bottom-nav .container {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--light-text);
+  font-size: 0.8rem;
+  padding: 5px 0;
+  width: 33.333%;
+}
+
+.nav-item img {
+  height: 24px;
+  margin-bottom: 5px;
+  opacity: 0.6;
+}
+
+.nav-item.active {
+  color: var(--primary-color);
+}
+
+.nav-item.active img {
+  opacity: 1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+  header {
+    padding: 10px 0;
+  }
+  
+  .logo h1 {
+    font-size: 1.3rem;
+  }
+  
+  .logo img {
+    height: 30px;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  #login-screen .card {
+    padding: 30px 20px;
+  }
+  
+  h2 {
+    font-size: 1.4rem;
+  }
+  
+  .prompt {
+    font-size: 1.1rem;
+  }
+  
+  main {
+    padding: 20px 0 80px;
+  }
+}
